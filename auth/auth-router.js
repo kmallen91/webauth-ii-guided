@@ -39,4 +39,13 @@ router.post("/login", (req, res) => {
     });
 });
 
+router.get("/logout", (req, res) => {
+  if (req.session) {
+    req.session.destroy();
+    res.status(200).json({ message: "logged out successfully" });
+  } else {
+    res.status(200).json({ message: "bye felicia" });
+  }
+});
+
 module.exports = router;

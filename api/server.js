@@ -2,9 +2,11 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors"); // research -- 'credentials: true' and 'withCredentials' when connecting from your React application
 const session = require("express-session");
+const KnexSessionStorage = require("connect-session-knex")(session); // for storing sessions in db
 
 const authRouter = require("../auth/auth-router.js");
 const usersRouter = require("../users/users-router.js");
+const knexConnection = require("../database/dbConfig");
 
 const server = express();
 
@@ -17,7 +19,14 @@ const sessionConfiguration = {
     httpOnly: true // prevent client javascript code from acesssing the cookie
   },
   resave: false, // save sessions even when they have not changed
-  saveUnitialized: true // read about it on the docs to respect GDPR, should default to false in production
+  saveUnitialized: true, // read about it on the docs to respect GDPR, should default to false in production
+  store: new KnexSessionStorage({
+    knex: knexConnection,
+    clearInterval: 1000 * 60 * 10, // delete expired sessions every 10 minutes
+    tablename: "user_sessions",
+    sidfieldname: "id",
+    createtable: true
+  })
 };
 
 server.use(helmet());
